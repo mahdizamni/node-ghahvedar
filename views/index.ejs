@@ -41,19 +41,19 @@
                     <th>تاریخ ایجاد</th>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody id="myTbody">
                 <% let num = 1 %>
                 <% for(let i in data){ %>
-                <tr>
-                    <td><%= num %></td>
-                    <% num++ %>
-                    <td><%= data[i].data.title %></td>
-                    <td><%= data[i].data.author %></td>
-                    <td><%= data[i].data.pages %></td>
-                    <td><%= data[i].ct %></td>
-                    <td><%= data[i].data.summary %></td>
-                    <td><%= data[i].cr %></td>
-                </tr>
+                    <tr>
+                        <td><%= num %></td>
+                        <% num++ %>
+                        <td><%= data[i].data.title %></td>
+                        <td><%= data[i].data.author %></td>
+                        <td><%= data[i].data.pages %></td>
+                        <td><%= data[i].ct %></td>
+                        <td><%= data[i].data.summary %></td>
+                        <td><%= data[i].cr %></td>
+                    </tr>
                 <% } %>
                 </tbody>
             </table>
@@ -66,21 +66,42 @@
     search.base('author', '/search/author');
     search.base('categories', null, false);
     search.base('sorting', null, false);
-    $('.mySelects').change(()=>{
+    $('.mySelects').change(() => {
         onchange()
     })
+
     function onchange() {
         let obj = {};
         let fields = ['title', 'author', 'categories', 'sorting'];
         for (let i in fields) {
             if ($(`#${fields[i]}`).val()) obj[fields[i]] = $(`#${fields[i]}`).val()
         }
-        axios.post('/filter',obj)
-            .then(r=>{
-
+        axios.post('/filter', obj)
+            .then(r => {
+                if (r.data.status == 200) {
+                    let a = ``, d = r.data.data, num = 1;
+                    for (let i in d) {
+                        a += `
+                        <tr>
+                    <td>${num}</td>
+                    <td>${d[i].data.title}</td>
+                    <td>${d[i].data.author}</td>
+                    <td>${d[i].data.pages}</td>
+                    <td>${d[i].ct}</td>
+                    <td>${d[i].data.summary}</td>
+                    <td>${d[i].cr}</td>
+                        </tr>
+                        `
+                    }
+                    $("#myTbody").html(a)
+                } else {
+                    warn.iconClass = "toast-warning";
+                    return toastr.error(r.data.description, 'خطا', warn)
+                }
             })
-            .catch(()=>{
-
+            .catch(() => {
+                warn.iconClass = "toast-warning";
+                return toastr.error('خطا در برقراری ارتباط با سرور', 'خطا', warn)
             })
 
     }
