@@ -1,0 +1,87 @@
+<%- include('header'); -%>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+<div class="container mt-5">
+    <div class="row" style="direction: rtl;">
+        <a href="/add" class="btn btn-success">افزودن</a>
+        <div class="row">
+            <div class="col-md-3">
+                <label for="title">نام کتاب</label>
+                <select id="title" class="mySelects" style="width: 200px"></select>
+            </div>
+            <div class="col-md-3">
+                <label for="author">نویسنده کتاب</label>
+                <select id="author" class="mySelects" style="width: 200px"></select>
+            </div>
+            <div class="col-md-3">
+                <label for="categories">دسته بندی</label>
+                <select id="categories" class="mySelects" style="width: 200px">
+                    <option value="computer">computer</option>
+                    <option value="general">general</option>
+                    <option value="novel">novel</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="sorting">مرتب سازی</label>
+                <select id="sorting" class="mySelects" style="width: 200px">
+                    <option value="1">تاریخ ایجاد</option>
+                    <option value="2">تعداد صفحات</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>ردیف</th>
+                    <th>نام کتاب</th>
+                    <th>نویسنده</th>
+                    <th>تعداد صفحات</th>
+                    <th>دسته بندی</th>
+                    <th>توضیحات</th>
+                    <th>تاریخ ایجاد</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% let num = 1 %>
+                <% for(let i in data){ %>
+                <tr>
+                    <td><%= num %></td>
+                    <% num++ %>
+                    <td><%= data[i].data.title %></td>
+                    <td><%= data[i].data.author %></td>
+                    <td><%= data[i].data.pages %></td>
+                    <td><%= data[i].ct %></td>
+                    <td><%= data[i].data.summary %></td>
+                    <td><%= data[i].cr %></td>
+                </tr>
+                <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<%- include('footer'); -%>
+<script>
+    search.base('title', '/search/title');
+    search.base('author', '/search/author');
+    search.base('categories', null, false);
+    search.base('sorting', null, false);
+    $('.mySelects').change(()=>{
+        onchange()
+    })
+    function onchange() {
+        let obj = {};
+        let fields = ['title', 'author', 'categories', 'sorting'];
+        for (let i in fields) {
+            if ($(`#${fields[i]}`).val()) obj[fields[i]] = $(`#${fields[i]}`).val()
+        }
+        axios.post('/filter',obj)
+            .then(r=>{
+
+            })
+            .catch(()=>{
+
+            })
+
+    }
+</script>
