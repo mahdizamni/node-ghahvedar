@@ -4,7 +4,7 @@ let book_schema = new Schema({
     title: {type: String,unique: true},
     author: {type: String},
     pages: {type: Number},
-    categories: {type: Array},
+    categories: {type:  [String]},
     summary: {type:String},
     createdAt: {type: Number},
 });

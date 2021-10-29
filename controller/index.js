@@ -3,16 +3,8 @@ const bookModel = require('./../model/book');
 const {check, validationResult} = require('express-validator');
 const prHlp = require('./../helpers/persian_date_helper');
 app.get('/', async (req, res) => {
-    let data = await bookModel.find({}).sort({_id: -1}).exec();
-    let arr = [];
-    for (let i in data) {
-        arr.push({
-            data: data[i],
-            cr: prHlp.get_def_date(new Date(data[i].createdAt)),
-            ct:data[i].categories.join(' , ')
-        })
-    }
-    res.render('index.ejs', {data: arr});
+    let data=await getInitialData({},{_id: -1});
+    res.render('index.ejs', {data});
 });
 app.route('/add')
     .get((req, res) => {
@@ -61,19 +53,48 @@ app.route('/add')
 
     });
 
-app.get('/search/:param',async (req,res)=>{
-   let q=req.query.q;
-   let field=req.params.param;
-   let obj={};
-   obj[field]={ $regex: '.*' + q + '.*' };
-   let data=await bookModel.find(obj).exec()
-    data=data.map(item=>{
-       return {
-           val:item[field],
-           _id:item._id,
-       }
+app.get('/search/:param', async (req, res) => {
+    let q = req.query.q;
+    let field = req.params.param;
+    let obj = {};
+    obj[field] = {$regex: '.*' + q + '.*'};
+    let data = await bookModel.find(obj).exec()
+    data = data.map(item => {
+        return {
+            val: item[field],
+            _id: item[field],
+        }
     });
     res.send(data)
-
 });
+app.post('/filter',async (req, res) => {
+    let body = req.body;
+    let sortField='_id';
+    let obj={};
+    if(body.sorting==2) sortField='pages';
+    let sorting={};
+    sorting[sortField]=-1
+    if(body.title)obj.title=body.title;
+    if(body.author)obj.author=body.author;
+    if(body.categories)obj.categories=body.categories;
+    let data=await getInitialData(obj,sorting);
+    res.send({
+        status:200,
+        data
+    })
+});
+const getInitialData=(obj,sorting)=>{
+  return new Promise(async (resolve, reject) => {
+      let data = await bookModel.find(obj).sort(sorting).exec();
+      let arr = [];
+      for (let i in data) {
+          arr.push({
+              data: data[i],
+              cr: prHlp.get_def_date(new Date(data[i].createdAt)),
+              ct: data[i].categories.join(' , ')
+          })
+      }
+      resolve(arr)
+  })
+};
 module.exports = app;
